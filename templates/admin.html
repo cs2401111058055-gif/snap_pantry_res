@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Admin Dashboard</h3>
+  <div>
+    <a href="{{ url_for('seed') }}" class="btn btn-outline-secondary btn-sm">Add Sample Data</a>
+    <a href="{{ url_for('add_product') }}" class="btn btn-success btn-sm">+ Add Product</a>
+  </div>
+</div>
+
+{% if expiring or expired %}
+<div class="alert alert-warning">
+  <h5 class="alert-heading">⚠ Expiry Alerts</h5>
+  <ul class="mb-0">
+    {% for p in expired %}
+      <li class="text-danger fw-bold">{{ p.name }} – EXPIRED {{ -p.days_left }} day(s) ago. Remove from shelf!</li>
+    {% endfor %}
+    {% for p in expiring %}
+      <li>{{ p.name }} (qty {{ p.quantity }}) – expires {% if p.days_left == 0 %}today{% else %}in {{ p.days_left }} day(s){% endif %}. {{ p.discount }}% discount applied.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% else %}
+<div class="alert alert-success">No products are close to expiry.</div>
+{% endif %}
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>#</th><th>Name</th><th>Qty</th><th>Mfg Date</th><th>Expiry Date</th>
+          <th>Days Left</th><th>Price</th><th>Discount</th><th>Final Price</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr class="{% if p.status == 'EXPIRED' %}table-danger{% elif p.status == 'SNAP' %}table-warning{% endif %}">
+          <td>{{ p.id }}</td>
+          <td>{{ p.name }}</td>
+          <td>{{ p.quantity }}</td>
+          <td>{{ p.mfg_date }}</td>
+          <td>{{ p.expiry_date }}</td>
+          <td>{{ p.days_left }}</td>
+          <td>₹{{ "%.2f"|format(p.price) }}</td>
+          <td>{{ p.discount }}%</td>
+          <td>{% if p.status == 'EXPIRED' %}-{% else %}₹{{ "%.2f"|format(p.final_price) }}{% endif %}</td>
+          <td>
+            {% if p.status == 'EXPIRED' %}<span class="badge bg-danger">Expired</span>
+            {% elif p.status == 'SNAP' %}<span class="badge bg-warning text-dark">Snap Pantry</span>
+            {% else %}<span class="badge bg-success">Normal</span>{% endif %}
+          </td>
+          <td class="text-nowrap">
+            <a href="{{ url_for('edit_product', pid=p.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+            <form method="post" action="{{ url_for('delete_product', pid=p.id) }}" class="d-inline"
+                  onsubmit="return confirm('Delete this product?');">
+              <button class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="11" class="text-center text-muted py-4">No products yet. Click "Add Sample Data" or "Add Product".</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

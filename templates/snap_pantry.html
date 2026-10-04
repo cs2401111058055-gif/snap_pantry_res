@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Snap Pantry{% endblock %}
+{% block content %}
+<div class="text-center mb-4">
+  <h2>🛒 Snap Pantry</h2>
+  <p class="text-muted">Near-expiry products at reduced prices. Grab them before they are gone!</p>
+</div>
+
+<div class="row g-3">
+  {% for p in items %}
+  <div class="col-md-4 col-lg-3">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <span class="badge bg-danger float-end">{{ p.discount }}% OFF</span>
+        <h5 class="card-title">{{ p.name }}</h5>
+        <p class="mb-1">
+          <span class="text-muted text-decoration-line-through">₹{{ "%.2f"|format(p.price) }}</span>
+          <span class="fs-4 fw-bold text-success ms-2">₹{{ "%.2f"|format(p.final_price) }}</span>
+        </p>
+        <p class="small mb-0">Expires: {{ p.expiry_date }}<br>
+          {% if p.days_left == 0 %}<strong class="text-danger">Expires today!</strong>
+          {% else %}{{ p.days_left }} day(s) left{% endif %}<br>
+          Stock: {{ p.quantity }}</p>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="col-12">
+    <div class="alert alert-info text-center">No Snap Pantry deals right now. Check back soon!</div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
